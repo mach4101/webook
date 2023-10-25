@@ -6,15 +6,18 @@ import (
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
+	"github.com/mach4101/geek_go_camp/webook/internal/domain"
+	"github.com/mach4101/geek_go_camp/webook/internal/service"
 )
 
 // 定义和user相关的路由
 type UserHandler struct {
+	svc         *service.UserService
 	emailExp    *regexp.Regexp
 	passwordExp *regexp.Regexp
 }
 
-func NewUserHandler() *UserHandler {
+func NewUserHandler(svc *service.UserService) *UserHandler {
 	const (
 		emailRegexPattern = `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
 		// 以字母开头，长度在6~18之间，只能包含字母、数字和下划线
@@ -25,6 +28,7 @@ func NewUserHandler() *UserHandler {
 	passwordExp := regexp.MustCompile(passwordRegexPattern, regexp.None)
 
 	return &UserHandler{
+		svc:         svc,
 		emailExp:    emailExp,
 		passwordExp: passwordExp,
 	}
@@ -86,6 +90,16 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 
 	if !ok {
 		ctx.String(http.StatusOK, "字母开头，长度在6~18之间，只能包含字母、数字和下划线")
+		return
+	}
+
+	err = u.svc.SignUp(ctx, domain.User{
+		Email:    req.Email,
+		Password: req.Password,
+	})
+
+	if err != nil {
+		ctx.String(http.StatusOK, "service error")
 		return
 	}
 

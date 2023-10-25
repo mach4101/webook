@@ -6,11 +6,47 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/mach4101/geek_go_camp/webook/internal/repository"
+	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
+	"github.com/mach4101/geek_go_camp/webook/internal/service"
 	"github.com/mach4101/geek_go_camp/webook/internal/web"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
+	db := initDB()
+	server := initWebServer()
 
+	u := initUser(db)
+	u.RegisterRoutes(server)
+	server.Run(":8080")
+}
+
+func initDB() *gorm.DB {
+	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/webook"))
+	// 只有在初始化中，panic
+	if err != nil {
+		panic(err)
+	}
+
+	err = dao.InitTable(db)
+	if err != nil {
+		panic(err)
+	}
+	return db
+
+}
+
+func initUser(db *gorm.DB) *web.UserHandler {
+	ud := dao.NewUserDAO(db)
+	repo := repository.NewUserRepository(ud)
+	svc := service.NewUserService(repo)
+	u := web.NewUserHandler(svc)
+	return u
+}
+
+func initWebServer() *gin.Engine {
 	server := gin.Default()
 
 	server.Use(cors.New(cors.Config{
@@ -27,8 +63,5 @@ func main() {
 
 		MaxAge: 12 * time.Hour,
 	}))
-
-	u := web.NewUserHandler()
-	u.RegisterRoutes(server)
-	server.Run(":8080")
+	return server
 }
