@@ -120,6 +120,26 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		Password string `json:"password"`
 	}
 
+	var req LoginReq
+	if err := ctx.Bind(&req); err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
+	err := u.svc.Login(ctx, req.Email, req.Password)
+
+	if err == service.ErrInvalidUserOrPassword {
+		ctx.String(http.StatusOK, "用户名或者密码不对")
+		return
+	}
+
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
+	ctx.String(http.StatusOK, "登陆OK")
+	return
 }
 
 func (u *UserHandler) Edit(ctx *gin.Context) {
