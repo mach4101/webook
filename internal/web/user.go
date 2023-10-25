@@ -98,6 +98,11 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 		Password: req.Password,
 	})
 
+	if err == service.ErrDuplicateEmail {
+		ctx.String(http.StatusOK, "邮箱冲突")
+		return
+	}
+
 	if err != nil {
 		ctx.String(http.StatusOK, "service error")
 		return
@@ -110,6 +115,10 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Login(ctx *gin.Context) {
+	type LoginReq struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
 }
 
