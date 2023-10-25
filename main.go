@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
@@ -63,5 +65,9 @@ func initWebServer() *gin.Engine {
 
 		MaxAge: 12 * time.Hour,
 	}))
+
+	store := cookie.NewStore([]byte("secret"))
+	server.Use(sessions.Sessions("mysession", store))
+
 	return server
 }

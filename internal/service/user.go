@@ -32,16 +32,16 @@ func (svc *UserService) SignUp(ctx context.Context, u domain.User) error {
 	return svc.repo.Create(ctx, u)
 }
 
-func (svc *UserService) Login(ctx context.Context, Email, Password string) error {
+func (svc *UserService) Login(ctx context.Context, Email, Password string) (domain.User, error) {
 	// 查找用户
 	u, err := svc.repo.FindByEmail(ctx, Email)
 
 	if err == repository.ErrUserNotFound {
-		return ErrInvalidUserOrPassword
+		return domain.User{}, ErrInvalidUserOrPassword
 	}
 
 	if err != nil {
-		return err
+		return domain.User{}, err
 	}
 
 	// 比较密码
@@ -50,8 +50,8 @@ func (svc *UserService) Login(ctx context.Context, Email, Password string) error
 	if err != nil {
 
 		// 接入日志之后需要记录日志
-		return ErrInvalidUserOrPassword
+		return domain.User{}, ErrInvalidUserOrPassword
 	}
 
-	return nil
+	return u, nil
 }

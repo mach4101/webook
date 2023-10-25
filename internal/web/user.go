@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	regexp "github.com/dlclark/regexp2"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/mach4101/geek_go_camp/webook/internal/domain"
 	"github.com/mach4101/geek_go_camp/webook/internal/service"
@@ -126,7 +127,7 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	err := u.svc.Login(ctx, req.Email, req.Password)
+	user, err := u.svc.Login(ctx, req.Email, req.Password)
 
 	if err == service.ErrInvalidUserOrPassword {
 		ctx.String(http.StatusOK, "用户名或者密码不对")
@@ -138,6 +139,11 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
+	// 登陆ok，设置和session相关的东西
+	sess := sessions.Default(ctx)
+	// 可以随便设置值
+	sess.Set("userId", user.Id)
+	sess.Save()
 	ctx.String(http.StatusOK, "登陆OK")
 	return
 }
