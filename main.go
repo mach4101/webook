@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -68,7 +68,13 @@ func initWebServer() *gin.Engine {
 	}))
 
 	// 第一个参数是sutentication key, 第二个是encryption key，最好是32位或者64位
-	store := memstore.NewStore([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
+	// store := memstore.NewStore([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
+
+	// 使用redis
+	store, err := redis.NewStore(16, "tcp", "localhost:6379", "", []byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
+	if err != nil {
+		panic("err")
+	}
 	server.Use(sessions.Sessions("mysession", store))
 
 	// 增加登陆校验
