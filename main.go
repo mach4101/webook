@@ -6,15 +6,16 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+
 	"github.com/mach4101/geek_go_camp/webook/internal/repository"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
 	"github.com/mach4101/geek_go_camp/webook/internal/service"
 	"github.com/mach4101/geek_go_camp/webook/internal/web"
 	"github.com/mach4101/geek_go_camp/webook/internal/web/middleware"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -38,7 +39,6 @@ func initDB() *gorm.DB {
 		panic(err)
 	}
 	return db
-
 }
 
 func initUser(db *gorm.DB) *web.UserHandler {
@@ -67,7 +67,8 @@ func initWebServer() *gin.Engine {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	store := cookie.NewStore([]byte("secret"))
+	// 第一个参数是sutentication key, 第二个是encryption key，最好是32位或者64位
+	store := memstore.NewStore([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
 	server.Use(sessions.Sessions("mysession", store))
 
 	// 增加登陆校验
