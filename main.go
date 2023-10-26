@@ -71,7 +71,7 @@ func initWebServer() *gin.Engine {
 	server.Use(sessions.Sessions("mysession", store))
 
 	// 增加登陆校验
-	server.Use(middleware.NewLoginMiddlewareBuilder().Build())
+	server.Use(middleware.NewLoginMiddlewareBuilder().IgnorePaths("/users/login").IgnorePaths("/users/signup").Build())
 
 	return server
 }
