@@ -1,6 +1,8 @@
 package web
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func RegisterRoutes() *gin.Engine {
 	server := gin.Default()
@@ -15,4 +17,5 @@ func registerUserRoutes(server *gin.Engine) {
 	server.POST("/users/login", u.Login)
 	server.POST("/users/edit", u.Edit)
 	server.GET("/users/profile", u.Profile)
+	server.POST("/users/logout", u.Logout)
 }

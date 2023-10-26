@@ -73,12 +73,12 @@ func initWebServer() *gin.Engine {
 	// 使用redis
 	store, err := redis.NewStore(16, "tcp", "localhost:6379", "", []byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
 	if err != nil {
-		panic("err")
+		panic("redis err")
 	}
 	server.Use(sessions.Sessions("mysession", store))
 
 	// 增加登陆校验
-	server.Use(middleware.NewLoginMiddlewareBuilder().IgnorePaths("/users/login").IgnorePaths("/users/signup").Build())
+	server.Use(middleware.NewLoginMiddlewareBuilder().IgnorePaths("/users/signup").IgnorePaths("/users/login").Build())
 
 	return server
 }

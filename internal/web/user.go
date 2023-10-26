@@ -7,6 +7,7 @@ import (
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+
 	"github.com/mach4101/geek_go_camp/webook/internal/domain"
 	"github.com/mach4101/geek_go_camp/webook/internal/service"
 )
@@ -48,6 +49,7 @@ func (u *UserHandler) RegisterRoutes(server *gin.Engine) {
 	ug.POST("/edit", u.Edit)
 	ug.POST("/login", u.Login)
 	ug.POST("/signup", u.SignUp)
+	ug.POST("/logout", u.Logout)
 }
 
 // 各handler的具体实现，类似controller
@@ -72,7 +74,6 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 	}
 
 	ok, err := u.emailExp.MatchString(req.Email)
-
 	if err != nil {
 		ctx.String(http.StatusOK, "系统错误")
 		return
@@ -143,15 +144,31 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 	sess := sessions.Default(ctx)
 	// 可以随便设置值
 	sess.Set("userId", user.Id)
+	sess.Options(sessions.Options{
+		// Secure:   true,
+		// HttpOnly: true,
+		MaxAge: 60, // 设置一分钟过期
+	})
 	sess.Save()
 	ctx.String(http.StatusOK, "登陆OK")
 	return
 }
 
-func (u *UserHandler) Edit(ctx *gin.Context) {
+func (u *UserHandler) Logout(ctx *gin.Context) {
+	// 登陆ok，设置和session相关的东西
+	sess := sessions.Default(ctx)
+	// 可以随便设置值
 
+	sess.Options(sessions.Options{
+		MaxAge: -1,
+	})
+	sess.Save()
+	ctx.String(http.StatusOK, "注销OK")
+	return
+}
+
+func (u *UserHandler) Edit(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {
-
 }
