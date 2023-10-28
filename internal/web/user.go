@@ -109,8 +109,6 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 	}
 
 	ctx.String(http.StatusOK, "ok")
-
-	// 数据库操作
 }
 
 func (u *UserHandler) Login(ctx *gin.Context) {
@@ -197,7 +195,7 @@ func (u *UserHandler) Edit(ctx *gin.Context) {
 	}, req.NewPassword)
 
 	if err != nil {
-		ctx.String(http.StatusOK, "svc出现问题")
+		ctx.String(http.StatusOK, "账号或者密码不对")
 		fmt.Println(err)
 		return
 	}
