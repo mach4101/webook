@@ -33,7 +33,7 @@ func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 		const uniqueConflictsErrNo uint16 = 1062
 		if mysqlErr.Number == 1062 {
-			//邮箱冲突
+			// 邮箱冲突
 			return ErrUserDuplicateEmail
 		}
 	}

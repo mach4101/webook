@@ -76,9 +76,11 @@ func initWebServer() *gin.Engine {
 		panic("redis err")
 	}
 	server.Use(sessions.Sessions("mysession", store))
-
-	// 增加登陆校验
-	server.Use(middleware.NewLoginMiddlewareBuilder().IgnorePaths("/users/signup").IgnorePaths("/users/login").Build())
+	//
+	// // 增加登陆校验
+	server.Use(middleware.NewLoginMiddlewareBuilder().
+		IgnorePaths("/users/signup").
+		IgnorePaths("/users/login").Build())
 
 	return server
 }

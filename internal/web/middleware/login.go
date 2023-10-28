@@ -29,7 +29,6 @@ func (l *LoginMiddlewareBuilder) Build() gin.HandlerFunc {
 		// 不需要登陆校验的：
 		for _, path := range l.paths {
 			if ctx.Request.URL.Path == path {
-				ctx.AbortWithStatus(http.StatusUnauthorized)
 				return
 			}
 		}
@@ -58,23 +57,17 @@ func (l *LoginMiddlewareBuilder) Build() gin.HandlerFunc {
 		if updateTime == nil {
 			// 还没有刷新
 			sess.Set("update_time", now)
-			sess.Options(sessions.Options{
-				MaxAge: 60,
-			})
-			sess.Save()
-			return
+			if err := sess.Save(); err != nil {
+				panic(err)
+			}
 		}
 
 		// 之前存过update_time
-		updateTimeVal, ok := updateTime.(time.Time)
+		updateTimeVal, _ := updateTime.(time.Time)
 
 		// 被改过
-		if !ok {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
 		// 如果距离上次刷新时间超过了十秒，那么刷新登录状态
+
 		if now.Sub(updateTimeVal) > time.Second*10 {
 			sess.Set("update_time", now)
 			sess.Save()

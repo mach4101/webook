@@ -3,14 +3,18 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/mach4101/geek_go_camp/webook/internal/domain"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository"
-	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrDuplicateEmail = repository.ErrUserDuplicateEmail
-var ErrInvalidUserOrPassword = errors.New("账号或密码不对")
+var (
+	ErrDuplicateEmail        = repository.ErrUserDuplicateEmail
+	ErrInvalidUserOrPassword = errors.New("账号或密码不对")
+)
 
 type UserService struct {
 	repo *repository.UserRepository
@@ -48,7 +52,6 @@ func (svc *UserService) Login(ctx context.Context, Email, Password string) (doma
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(Password))
 
 	if err != nil {
-
 		// 接入日志之后需要记录日志
 		return domain.User{}, ErrInvalidUserOrPassword
 	}

@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
 	regexp "github.com/dlclark/regexp2"
@@ -68,11 +67,6 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	if req.Password != req.ConfirmPassword {
-		ctx.String(http.StatusOK, "两次输入的密码不一致")
-		return
-	}
-
 	ok, err := u.emailExp.MatchString(req.Email)
 	if err != nil {
 		ctx.String(http.StatusOK, "系统错误")
@@ -83,7 +77,10 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "邮箱格式不对")
 		return
 	}
-
+	if req.Password != req.ConfirmPassword {
+		ctx.String(http.StatusOK, "两次输入的密码不一致")
+		return
+	}
 	ok, err = u.passwordExp.MatchString(req.Password)
 	if err != nil {
 		ctx.String(http.StatusOK, "系统错误")
@@ -111,7 +108,6 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 	}
 
 	ctx.String(http.StatusOK, "ok")
-	fmt.Printf("%+v\n", req)
 
 	// 数据库操作
 }
