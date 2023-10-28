@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/mach4101/geek_go_camp/webook/internal/domain"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
@@ -34,7 +33,6 @@ func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
 	u, err := r.dao.FindByEmail(ctx, email)
-	fmt.Printf("repo error, %+v", u)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -42,6 +40,11 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.
 		Email:    u.Password,
 		Password: u.Password,
 	}, nil
+}
+
+func (r *UserRepository) UpdateByEmail(ctx context.Context, email, password string) error {
+	err := r.dao.UpdateByEmail(ctx, email, password)
+	return err
 }
 
 func (r *UserRepository) FindById(int64) {

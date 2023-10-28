@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -48,7 +47,7 @@ func (svc *UserService) Login(ctx context.Context, Email, Password string) (doma
 		return domain.User{}, err
 	}
 
-	// 比较密码
+	// 比较密码, 第一个是hash，第二个是密码
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(Password))
 
 	if err != nil {
@@ -57,4 +56,34 @@ func (svc *UserService) Login(ctx context.Context, Email, Password string) (doma
 	}
 
 	return u, nil
+}
+
+func (svc *UserService) Edit(ctx context.Context, oldUser domain.User, password string) error {
+	// 第一部分和登录一样，主要是查找用户，比较密码，判断该用户是否存在
+	u, err := svc.repo.FindByEmail(ctx, oldUser.Email)
+	if err == repository.ErrUserNotFound {
+		return ErrInvalidUserOrPassword
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(oldUser.Password))
+
+	if err != nil {
+		return ErrInvalidUserOrPassword
+	}
+
+	hashedPasswd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	err = svc.repo.UpdateByEmail(ctx, oldUser.Email, string(hashedPasswd))
+
+	if err != nil {
+		return errors.New("更新出问题")
+	}
+	return err
 }

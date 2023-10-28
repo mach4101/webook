@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	regexp "github.com/dlclark/regexp2"
@@ -163,7 +164,45 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 	return
 }
 
+// 编辑用户信息, 主要包括密码的修改
 func (u *UserHandler) Edit(ctx *gin.Context) {
+	type EditReq struct {
+		Email       string `json:"email"`
+		Password    string `json:"password"`
+		NewPassword string `json:"new_password"`
+	}
+
+	var req EditReq
+	if err := ctx.Bind(&req); err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
+	// 验证新密码是否可用
+	ok, err := u.passwordExp.MatchString(req.NewPassword)
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
+	if !ok {
+		ctx.String(http.StatusOK, "新密码不符合规范")
+		return
+	}
+
+	// 对用户进行修改
+	err = u.svc.Edit(ctx, domain.User{
+		Email:    req.Email,
+		Password: req.Password,
+	}, req.NewPassword)
+
+	if err != nil {
+		ctx.String(http.StatusOK, "svc出现问题")
+		fmt.Println(err)
+		return
+	}
+
+	ctx.String(http.StatusOK, "更新成功")
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {

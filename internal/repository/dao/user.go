@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -45,6 +46,12 @@ func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error)
 	var u User
 	err := dao.db.WithContext(ctx).Where("email = ?", email).First(&u).Error
 	return u, err
+}
+
+func (dao *UserDAO) UpdateByEmail(ctx context.Context, email string, password string) error {
+	err := dao.db.Model(&User{}).WithContext(ctx).Where("email = ?", email).Update("password", password).Error
+	fmt.Println(err)
+	return err
 }
 
 // 与数据库直接对应
