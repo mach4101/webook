@@ -6,8 +6,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/redis"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/mach4101/geek_go_camp/webook/internal/service"
 	"github.com/mach4101/geek_go_camp/webook/internal/web"
 	"github.com/mach4101/geek_go_camp/webook/internal/web/middleware"
+	"github.com/mach4101/geek_go_camp/webook/pkg/ginx/middlewares/ratelimite"
 )
 
 func main() {
@@ -46,11 +48,18 @@ func initUser(db *gorm.DB) *web.UserHandler {
 	repo := repository.NewUserRepository(ud)
 	svc := service.NewUserService(repo)
 	u := web.NewUserHandler(svc)
+
 	return u
 }
 
 func initWebServer() *gin.Engine {
 	server := gin.Default()
+
+	// 限流插件
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	server.Use(ratelimit.NewBuilder(redisClient, time.Second, 100).Build())
 
 	server.Use(cors.New(cors.Config{
 		// AllowOrigins:     []string{"http://localhost:3000"},
@@ -71,13 +80,13 @@ func initWebServer() *gin.Engine {
 	}))
 
 	// 第一个参数是sutentication key, 第二个是encryption key，最好是32位或者64位
-	// store := memstore.NewStore([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
+	store := memstore.NewStore([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
 
 	// 使用redis
-	store, err := redis.NewStore(16, "tcp", "localhost:6379", "", []byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
-	if err != nil {
-		panic("redis err")
-	}
+	// store, err := redis.NewStore(16, "tcp", "localhost:6379", "", []byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), []byte("wm67pcvktHdVpiHbxqV5W7kfJssuQ0Ae"))
+	// if err != nil {
+	// 	panic("redis err")
+	// }
 	server.Use(sessions.Sessions("mysession", store))
 	//
 	// // 增加登陆校验
