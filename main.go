@@ -12,12 +12,12 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/mach4101/geek_go_camp/webook/internal/pkg/ginx/middlewares/ratelimit"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
 	"github.com/mach4101/geek_go_camp/webook/internal/service"
 	"github.com/mach4101/geek_go_camp/webook/internal/web"
 	"github.com/mach4101/geek_go_camp/webook/internal/web/middleware"
-	"github.com/mach4101/geek_go_camp/webook/pkg/ginx/middlewares/ratelimite"
 )
 
 func main() {
