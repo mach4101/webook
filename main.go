@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"strings"
 	"time"
 
@@ -21,11 +22,16 @@ import (
 )
 
 func main() {
-	db := initDB()
-	server := initWebServer()
+	// db := initDB()
+	// server := initWebServer()
+	//
+	// u := initUser(db)
+	// u.RegisterRoutes(server)
 
-	u := initUser(db)
-	u.RegisterRoutes(server)
+	server := gin.Default()
+	server.GET("/hello", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "来啦老弟")
+	})
 	server.Run(":8080")
 }
 
@@ -93,7 +99,6 @@ func initWebServer() *gin.Engine {
 	// server.Use(middleware.NewLoginMiddlewareBuilder().
 	// 	IgnorePaths("/users/signup").
 	// 	IgnorePaths("/users/login").Build())
-
 	// 使用x-jwt-token
 	server.Use(middleware.NewLoginJWTMiddlewareBuilder().IgnorePaths("/users/login").IgnorePaths("/users/signup").Build())
 	return server
