@@ -86,6 +86,6 @@ func initWebServer() *gin.Engine {
 	// 	IgnorePaths("/users/login").Build())
 
 	// 使用x-jwt-token
-	server.Use(middleware.NewLoginJWTMiddlewareBuilder().IgnorePaths("users/login").IgnorePaths("users/signup").Build())
+	server.Use(middleware.NewLoginJWTMiddlewareBuilder().IgnorePaths("/users/login").IgnorePaths("/users/signup").Build())
 	return server
 }

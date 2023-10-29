@@ -46,7 +46,8 @@ func (u *UserHandler) RegisterRoutes(server *gin.Engine) {
 
 	// 分组路由, 省略前缀
 	ug := server.Group("/users")
-	ug.GET("/profile", u.Profile)
+	// ug.GET("/profile", u.Profile)
+	ug.GET("/profile", u.ProfileJWT)
 	ug.POST("/edit", u.Edit)
 	// ug.POST("/login", u.Login)
 	ug.POST("/login", u.LoginJWT)
@@ -139,7 +140,10 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	}
 
 	// 用JWT设置登录状态，需要先生成一个JWT的token
-	token := jwt.New(jwt.SigningMethodHS512)
+	claims := UserClaims{
+		Uid: user.Id,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "系统错误")
@@ -147,7 +151,6 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	}
 
 	ctx.Header("x-jwt-token", tokenStr)
-	fmt.Println(user)
 	ctx.String(http.StatusOK, "登陆OK")
 
 	return
@@ -246,4 +249,29 @@ func (u *UserHandler) Edit(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {
+	ctx.String(http.StatusOK, "这是你的profile")
+}
+
+func (u *UserHandler) ProfileJWT(ctx *gin.Context) {
+	c, _ := ctx.Get("claims")
+	// 你可以断定，必然有 claims
+	//if !ok {
+	//	// 你可以考虑监控住这里
+	//	ctx.String(http.StatusOK, "系统错误")
+	//	return
+	//}
+	// ok 代表是不是 *UserClaims
+	claims, ok := c.(*UserClaims)
+	if !ok {
+		// 你可以考虑监控住这里
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+	fmt.Println("profileJWT: ", claims.Uid)
+	// 这边就是你补充 profile 的其它代码
+}
+
+type UserClaims struct {
+	jwt.RegisteredClaims
+	Uid int64
 }

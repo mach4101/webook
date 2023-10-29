@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
+
+	"github.com/mach4101/geek_go_camp/webook/internal/web"
 )
 
 // JWT登录校验
@@ -48,7 +50,9 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 
 		tokenStr := segs[1]
 
-		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		claims := &web.UserClaims{}
+		// 从tokenstr中把数据解析到claims中, 还原数据结构
+		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"), nil
 		})
 		if err != nil {
@@ -56,9 +60,12 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 			return
 		}
 
-		if token == nil || !token.Valid {
+		if token == nil || !token.Valid || claims.Uid == 0 {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+
+		// 若在后续的操作中需要使用到token中携带的字段，俺么可以使用set
+		ctx.Set("claims", claims)
 	}
 }
