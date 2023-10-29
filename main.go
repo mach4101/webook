@@ -54,8 +54,11 @@ func initWebServer() *gin.Engine {
 
 	server.Use(cors.New(cors.Config{
 		// AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowMethods: []string{"GET", "POST"},
+		AllowHeaders: []string{"Content-Type", "Authorization"},
+
+		// 加了之后前端才能拿到
+		ExposeHeaders:    []string{"x-jwt-token"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
 			if strings.HasPrefix(origin, "http://localhost") {
@@ -78,9 +81,11 @@ func initWebServer() *gin.Engine {
 	server.Use(sessions.Sessions("mysession", store))
 	//
 	// // 增加登陆校验
-	server.Use(middleware.NewLoginMiddlewareBuilder().
-		IgnorePaths("/users/signup").
-		IgnorePaths("/users/login").Build())
+	// server.Use(middleware.NewLoginMiddlewareBuilder().
+	// 	IgnorePaths("/users/signup").
+	// 	IgnorePaths("/users/login").Build())
 
+	// 使用x-jwt-token
+	server.Use(middleware.NewLoginJWTMiddlewareBuilder().IgnorePaths("users/login").IgnorePaths("users/signup").Build())
 	return server
 }
