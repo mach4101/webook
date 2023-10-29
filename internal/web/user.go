@@ -142,7 +142,8 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 
 	// 用JWT设置登录状态，需要先生成一个JWT的token
 	claims := UserClaims{
-		Uid: user.Id,
+		Uid:       user.Id,
+		UserAgent: ctx.Request.UserAgent(),
 		// 设置过期时间
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
@@ -278,5 +279,6 @@ func (u *UserHandler) ProfileJWT(ctx *gin.Context) {
 
 type UserClaims struct {
 	jwt.RegisteredClaims
-	Uid int64
+	Uid       int64
+	UserAgent string
 }
