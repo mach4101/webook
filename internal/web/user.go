@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-contrib/sessions"
@@ -142,6 +143,10 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	// 用JWT设置登录状态，需要先生成一个JWT的token
 	claims := UserClaims{
 		Uid: user.Id,
+		// 设置过期时间
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"))

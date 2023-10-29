@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -63,6 +65,20 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 		if token == nil || !token.Valid || claims.Uid == 0 {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
+		}
+
+		now := time.Now()
+		// 每十秒钟刷新一次
+		if claims.ExpiresAt.Sub(now) < time.Second*50 {
+			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute))
+			// 需要重新生成token
+			tokenStr, err = token.SignedString([]byte("nUCUFGagbcXzkDJ33spmZ6CyW8zNaFu3"))
+			if err != nil {
+				fmt.Println("续约失败")
+				// 加入日志
+			}
+
+			ctx.Header("x-jwt-token", tokenStr)
 		}
 
 		// 若在后续的操作中需要使用到token中携带的字段，俺么可以使用set
