@@ -13,6 +13,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/mach4101/geek_go_camp/webook/config"
 	"github.com/mach4101/geek_go_camp/webook/internal/pkg/ginx/middlewares/ratelimit"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
@@ -22,21 +23,20 @@ import (
 )
 
 func main() {
-	// db := initDB()
-	// server := initWebServer()
+	db := initDB()
+	server := initWebServer()
 	//
-	// u := initUser(db)
-	// u.RegisterRoutes(server)
-
-	server := gin.Default()
+	u := initUser(db)
+	u.RegisterRoutes(server)
 	server.GET("/hello", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "来啦老弟")
+		ctx.String(http.StatusOK, "你好，你来了")
 	})
+
 	server.Run(":8080")
 }
 
 func initDB() *gorm.DB {
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/webook"))
+	db, err := gorm.Open(mysql.Open(config.Config.DB.DSN))
 	// 只有在初始化中，panic
 	if err != nil {
 		panic(err)
@@ -63,7 +63,7 @@ func initWebServer() *gin.Engine {
 
 	// 限流插件
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: config.Config.Redis.Addr,
 	})
 	server.Use(ratelimit.NewBuilder(redisClient, time.Second, 100).Build())
 
@@ -79,7 +79,7 @@ func initWebServer() *gin.Engine {
 			if strings.HasPrefix(origin, "http://localhost") {
 				return true
 			}
-			return strings.Contains(origin, "domain.name")
+			return strings.Contains(origin, "mach")
 		},
 
 		MaxAge: 12 * time.Hour,

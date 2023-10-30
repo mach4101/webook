@@ -7,7 +7,9 @@ spec:
     app: webook-redis
   ports:
     - protocol: TCP
+      # 集群内部的端口
       port: 11479
       targetPort: 6379
+      # 外部访问的端口
       nodePort: 30003
   type: NodePort  
