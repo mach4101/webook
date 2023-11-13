@@ -87,3 +87,8 @@ func (svc *UserService) Edit(ctx context.Context, oldUser domain.User, password 
 	}
 	return err
 }
+
+func (svc *UserService) profile(ctx context.Context, id int64) (domain.User, error) {
+	u, err := svc.repo.FindById(ctx, id)
+	return u, err
+}

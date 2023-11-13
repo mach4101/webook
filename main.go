@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"strings"
 	"time"
 
@@ -14,8 +13,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/mach4101/geek_go_camp/webook/config"
-	"github.com/mach4101/geek_go_camp/webook/internal/pkg/ginx/middlewares/ratelimit"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository"
+	"github.com/mach4101/geek_go_camp/webook/internal/repository/cache"
 	"github.com/mach4101/geek_go_camp/webook/internal/repository/dao"
 	"github.com/mach4101/geek_go_camp/webook/internal/service"
 	"github.com/mach4101/geek_go_camp/webook/internal/web"
@@ -28,10 +27,6 @@ func main() {
 	//
 	u := initUser(db)
 	u.RegisterRoutes(server)
-	server.GET("/hello", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "你好，你来了")
-	})
-
 	server.Run(":8080")
 }
 
@@ -51,7 +46,10 @@ func initDB() *gorm.DB {
 
 func initUser(db *gorm.DB) *web.UserHandler {
 	ud := dao.NewUserDAO(db)
-	repo := repository.NewUserRepository(ud)
+	uc := cache.NewUserCache(redis.NewClient(&redis.Options{
+		Addr: config.Config.Redis.Addr,
+	}))
+	repo := repository.NewUserRepository(ud, uc)
 	svc := service.NewUserService(repo)
 	u := web.NewUserHandler(svc)
 
@@ -62,10 +60,10 @@ func initWebServer() *gin.Engine {
 	server := gin.Default()
 
 	// 限流插件
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: config.Config.Redis.Addr,
-	})
-	server.Use(ratelimit.NewBuilder(redisClient, time.Second, 100).Build())
+	// redisClient := redis.NewClient(&redis.Options{
+	// 	Addr: config.Config.Redis.Addr,
+	// })
+	// server.Use(ratelimit.NewBuilder(redisClient, time.Second, 100).Build())
 
 	server.Use(cors.New(cors.Config{
 		// AllowOrigins:     []string{"http://localhost:3000"},

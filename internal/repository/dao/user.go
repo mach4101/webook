@@ -24,6 +24,12 @@ func NewUserDAO(db *gorm.DB) *UserDAO {
 	}
 }
 
+func (dao *UserDAO) FindById(ctx context.Context, id int64) (User, error) {
+	var u User
+	err := dao.db.WithContext(ctx).Where("`id` = ?", id).First(&u).Error
+	return u, err
+}
+
 func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 	// 毫秒数
 	now := time.Now().UnixMilli()
